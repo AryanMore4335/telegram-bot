@@ -67,11 +67,9 @@ if user_id not in users:
     "Welcome to Aryan Insta Download Bot\n\nFor use bot join this channel",
     reply_markup=markup
 )
+        
 return
-
-    bot.send_message(message.chat.id,"Send Instagram Reel Link")
-
-
+bot.send_message(message.chat.id,"Send Instagram Reel Link")
 @bot.message_handler(commands=['stats'])
 def stats(message):
 
