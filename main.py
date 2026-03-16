@@ -25,6 +25,13 @@ bot = telebot.TeleBot(TOKEN)
 
 users = set()
 
+try:
+    with open("users.txt","r") as f:
+        for line in f:
+            users.add(int(line.strip()))
+except:
+    pass
+
 
 def is_joined(user_id):
     try:
@@ -38,7 +45,11 @@ def is_joined(user_id):
 def start(message):
 
     user_id = message.from_user.id
+
+if user_id not in users:
     users.add(user_id)
+    with open("users.txt","a") as f:
+        f.write(str(user_id) + "\n")
 
     if not is_joined(user_id):
 
