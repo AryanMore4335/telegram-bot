@@ -1,5 +1,8 @@
 from flask import Flask
 from threading import Thread
+import telebot
+import yt_dlp
+import os
 
 app = Flask('')
 
@@ -13,9 +16,7 @@ def run():
 def keep_alive():
     t = Thread(target=run)
     t.start()
-import telebot
-import yt_dlp
-import os
+
 
 TOKEN = "7757411907:AAGaYXArUQbz6qC14SUd12kLe05MW9oYGY0"
 CHANNEL = "@Aryan_vaishu"
@@ -25,6 +26,7 @@ bot = telebot.TeleBot(TOKEN)
 
 users = set()
 
+# load users
 try:
     with open("users.txt","r") as f:
         for line in f:
@@ -33,9 +35,16 @@ except:
     pass
 
 
+def save_user(user_id):
+    if user_id not in users:
+        users.add(user_id)
+        with open("users.txt","a") as f:
+            f.write(str(user_id) + "\n")
+
+
 def is_joined(user_id):
     try:
-        member = bot.get_chat_member(CHANNEL, user_id)
+        member = bot.get_chat_member(CHANNEL,user_id)
         return member.status in ["member","administrator","creator"]
     except:
         return False
@@ -45,11 +54,7 @@ def is_joined(user_id):
 def start(message):
 
     user_id = message.from_user.id
-
-if user_id not in users:
-    users.add(user_id)
-    with open("users.txt","a") as f:
-        f.write(str(user_id) + "\n")
+    save_user(user_id)
 
     if not is_joined(user_id):
 
@@ -62,15 +67,16 @@ if user_id not in users:
 
         markup.add(join_btn)
 
-        if not is_joined(user_id):
-            bot.send_message(
-        message.chat.id,
-        "Welcome to Aryan Insta Download Bot\n\nFor use bot join this channel",
-        reply_markup=markup
-    )
-    return
+        bot.send_message(
+            message.chat.id,
+            "Welcome to Aryan Insta Download Bot\n\nFor use bot join this channel",
+            reply_markup=markup
+        )
+        return
 
-bot.send_message(message.chat.id,"Send Instagram Reel Link")
+    bot.send_message(message.chat.id,"Send Instagram Reel Link")
+
+
 @bot.message_handler(commands=['stats'])
 def stats(message):
 
@@ -86,13 +92,16 @@ def broadcast(message):
 
     text = message.text.replace("/broadcast ","")
 
+    sent = 0
+
     for user in users:
         try:
             bot.send_message(user,text)
+            sent += 1
         except:
             pass
 
-    bot.send_message(message.chat.id,"Broadcast Sent")
+    bot.send_message(message.chat.id,f"Broadcast sent to {sent} users")
 
 
 @bot.message_handler(func=lambda m: "instagram.com" in m.text)
@@ -108,17 +117,22 @@ def download(message):
     }
 
     try:
+
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download([url])
 
-        video = open("video.mp4",'rb')
+        video = open("video.mp4","rb")
 
         bot.send_video(message.chat.id,video)
+
+        video.close()
 
         os.remove("video.mp4")
 
     except:
+
         bot.send_message(message.chat.id,"Download failed")
+
 
 keep_alive()
 bot.infinity_polling(skip_pending=True)
