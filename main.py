@@ -101,7 +101,7 @@ def start(message):
 
         bot.send_photo(
             message.chat.id,
-            "https://i.imgur.com/Z6X7K6R.png",
+            "https://t.me/ggghjhhhjh/11",
             caption="📥 Welcome to Aryan Insta Download Bot\n\nJoin all channels then click VERIFY",
             reply_markup=markup
         )
