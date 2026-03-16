@@ -98,4 +98,4 @@ def download(message):
         bot.send_message(message.chat.id,"Download failed")
 
 
-bot.infinity_polling()
+bot.infinity_polling(skip_pending=True)
